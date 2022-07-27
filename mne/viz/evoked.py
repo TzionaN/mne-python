@@ -197,7 +197,7 @@ def _plot_evoked(evoked, picks=None, exclude='bads', unit=True, show=True,
                  ylim=None, proj=False, xlim='tight', hline=None,
                  units=None, scalings=None, titles=None, axes=None,
                  plot_type='butterfly', cmap=None,
-                 gfp=False, window_title=None, spatial_colors=False,
+                 gfp=False, window_title=None, spatial_colors='auto',
                  selectable=True, zorder='unsorted',
                  noise_cov=None, colorbar=True, mask=None, mask_style=None,
                  mask_cmap=None, mask_alpha=.25, time_unit='s',
@@ -410,6 +410,10 @@ def _plot_lines(data, info, picks, fig, axes, spatial_colors, unit, units,
                                            alpha=0.75)]
     gfp_path_effects = [patheffects.withStroke(linewidth=5, foreground="w",
                                                alpha=0.75)]
+    was_auto = False
+    if spatial_colors == 'auto':
+         spatial_colors = True
+         was_auto = True
     if selectable:
         selectables = np.ones(len(ch_types_used), dtype=bool)
         for type_idx, this_type in enumerate(ch_types_used):
@@ -451,7 +455,7 @@ def _plot_lines(data, info, picks, fig, axes, spatial_colors, unit, units,
             if not gfp_only:
                 chs = [info['chs'][i] for i in idx]
                 locs3d = np.array([ch['loc'][:3] for ch in chs])
-                if (spatial_colors is True and
+                if (spatial_colors is True and was_auto is False and
                         not _check_ch_locs(info=info, picks=idx)):
                     warn('Channel locations not available. Disabling spatial '
                          'colors.')
@@ -515,7 +519,7 @@ def _plot_lines(data, info, picks, fig, axes, spatial_colors, unit, units,
                 ax.fill_between(times, y_offset, this_gfp, color='none',
                                 facecolor=gfp_color, zorder=1, alpha=0.2)
                 line_list.append(ax.plot(times, this_gfp, color=gfp_color,
-                                         zorder=3, alpha=line_alpha)[0])
+                                        zorder=3, alpha=line_alpha)[0])
                 ax.text(times[0] + 0.01 * (times[-1] - times[0]),
                         this_gfp[0] + 0.05 * np.diff(ax.get_ylim())[0],
                         label, zorder=4, color=gfp_color,
@@ -736,11 +740,13 @@ def plot_evoked(evoked, picks=None, exclude='bads', unit=True, show=True,
            Plot GFP for EEG instead of RMS. Label RMS traces correctly as such.
     window_title : str | None
         The title to put at the top of the figure.
-    spatial_colors : bool
+    spatial_colors : bool | 'auto'
         If True, the lines are color coded by mapping physical sensor
         coordinates into color values. Spatially similar channels will have
         similar colors. Bad channels will be dotted. If False, the good
-        channels are plotted black and bad channels red. Defaults to False.
+        channels are plotted black and bad channels red. If 'auto', reverts to
+        True, but without warning if no channel locations are present
+        Defaults to 'auto'.
     zorder : str | callable
         Which channels to put in the front or back. Only matters if
         ``spatial_colors`` is used.

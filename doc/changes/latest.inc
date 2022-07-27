@@ -115,6 +115,8 @@ Enhancements
 
 - Add an alias that maps EGI reference channel names (``VREF`` or ``Vertex Reference``) to the electrode name in the standard EGI montages (``Cz``). Now setting standard EGI montages with :meth:`~mne.io.Raw.set_montage` with ``match_alias=True`` will avoid raising an error (:gh:`10823` by `Scott Huberty`_)
 
+- :func:`mne.Evoked.plot` spatial_colors parameter now defaults to 'auto', which becomes True, while not warning if there are no channels. (:gh:`xxxx` by Tziona NessAiver)
+
 Bugs
 ~~~~
 - Fix bug in ``mne.surface._project_onto_surface`` for the condition ``method != 'accurate' and return_nn`` (:gh:`10930` by `Christian O'Reilly`_)
